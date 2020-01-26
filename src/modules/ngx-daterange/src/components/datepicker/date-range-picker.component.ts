@@ -1,28 +1,39 @@
-import { Component, Input, Output, EventEmitter, HostListener, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+  OnInit,
+  ViewEncapsulation
+} from "@angular/core";
+import { FormGroup, FormControl } from "@angular/forms";
 
-import { defaultDateRangePickerOptions } from '../../constants';
-import { IDateRange, IDateRangePickerOptions, IDefinedDateRange, IChangedData } from '../../interfaces';
+import { defaultDateRangePickerOptions } from "../../constants";
+import {
+  IDateRange,
+  IDateRangePickerOptions,
+  IDefinedDateRange,
+  IChangedData
+} from "../../interfaces";
 
-import * as momentNs from 'moment'; const moment = momentNs;
+import * as momentNs from "moment";
+const moment = momentNs;
 
 let instanceCount = 0;
 
 @Component({
   encapsulation: ViewEncapsulation.None,
-  selector: 'date-range-picker',
-  styleUrls: [
-    './date-range-picker.component.scss',
-  ],
-  templateUrl: './date-range-picker.component.html',
+  selector: "date-range-picker",
+  styleUrls: ["./date-range-picker.component.scss"],
+  templateUrl: "./date-range-picker.component.html"
 })
 export class DateRangePickerComponent implements OnInit {
-
   @Input()
   options: IDateRangePickerOptions = defaultDateRangePickerOptions;
 
   @Input()
-  controlName: string = 'dateRange';
+  controlName: string = "dateRange";
 
   @Input()
   instanceId: string = null;
@@ -44,23 +55,36 @@ export class DateRangePickerComponent implements OnInit {
   fromYear: number;
   toMonth: number;
   toYear: number;
-  range = '';
+  range = "";
   showCalendars = false;
 
   get enableApplyButton(): boolean {
-    return !this.options.autoApply && !this.options.singleCalendar && this.fromDate !== null && this.toDate !== null;
+    return (
+      !this.options.autoApply &&
+      !this.options.singleCalendar &&
+      this.fromDate !== null &&
+      this.toDate !== null
+    );
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener("document:click", ["$event"])
   handleClick(event: Event) {
     const target = event.target as HTMLInputElement;
 
     // close the DatePicker if clicking outside is not allowed
     if (!this.options.clickOutsideAllowed) {
-      const containerElementClassRoot = 'dateRangePicker';
-      const targetPathClassNames: string[] = event['path'].map(obj => obj.className) || [''];
+      const containerElementClassRoot = "dateRangePicker";
+      let targetPathClassNames: string[] = [""];
+      if (event["path"]) {
+        targetPathClassNames = event["path"].map(obj => obj.className || "");
+      } else if (event.composedPath()) {
+        targetPathClassNames = event
+          .composedPath()
+          .map(item => (<Element>item).className || "");
+      }
+
       const targetExistsInPath = targetPathClassNames.some(className => {
-        if (typeof className === 'string') {
+        if (typeof className === "string") {
           return className && className.includes(containerElementClassRoot);
         }
 
@@ -81,7 +105,7 @@ export class DateRangePickerComponent implements OnInit {
   constructor() {
     if (!this.instanceId) {
       // assign auto-id
-      this.instanceId = `dateRangePicker-${ instanceCount++ }`;
+      this.instanceId = `dateRangePicker-${instanceCount++}`;
     }
   }
 
@@ -92,8 +116,13 @@ export class DateRangePickerComponent implements OnInit {
     // ensure input dates are within the min/max dates in options
     this.validateInputDates();
 
-    if (this.options.preDefinedRanges && this.options.preDefinedRanges.length > 0) {
-      this.defaultRanges = this.validateAndAssignPredefinedRanges(this.options.preDefinedRanges);
+    if (
+      this.options.preDefinedRanges &&
+      this.options.preDefinedRanges.length > 0
+    ) {
+      this.defaultRanges = this.validateAndAssignPredefinedRanges(
+        this.options.preDefinedRanges
+      );
     }
 
     // assign values not present in options with default values
@@ -129,12 +158,24 @@ export class DateRangePickerComponent implements OnInit {
   }
 
   validateInputDates(): void {
-    if (this.fromDate && this.options.minDate && this.fromDate.isBefore(this.options.minDate, 'date')) {
-      throw new RangeError('@Input fromDate is before the specified minDate in options');
+    if (
+      this.fromDate &&
+      this.options.minDate &&
+      this.fromDate.isBefore(this.options.minDate, "date")
+    ) {
+      throw new RangeError(
+        "@Input fromDate is before the specified minDate in options"
+      );
     }
 
-    if (this.toDate && this.options.maxDate && this.toDate.isAfter(this.options.maxDate, 'date')) {
-      throw new RangeError('@Input toDate is after the specified maxDate in options');
+    if (
+      this.toDate &&
+      this.options.maxDate &&
+      this.toDate.isAfter(this.options.maxDate, "date")
+    ) {
+      throw new RangeError(
+        "@Input toDate is after the specified maxDate in options"
+      );
     }
   }
 
@@ -142,11 +183,16 @@ export class DateRangePickerComponent implements OnInit {
     // validate maxDate isn't before minDate or vice versa
     if (this.options) {
       if (this.options.minDate && this.options.maxDate) {
-        if (this.options.minDate.isAfter(this.options.maxDate, 'date')) {
-          throw new RangeError('minDate specified in options is after the maxDate');
-        }
-        else if (this.options.maxDate.isBefore(this.options.minDate, 'date')) {
-          throw new RangeError('maxDate specified in options is before the minDate');
+        if (this.options.minDate.isAfter(this.options.maxDate, "date")) {
+          throw new RangeError(
+            "minDate specified in options is after the maxDate"
+          );
+        } else if (
+          this.options.maxDate.isBefore(this.options.minDate, "date")
+        ) {
+          throw new RangeError(
+            "maxDate specified in options is before the minDate"
+          );
         }
       }
     }
@@ -154,22 +200,27 @@ export class DateRangePickerComponent implements OnInit {
 
   // assists CSS to fix small positioning bug with From:/To: date text
   checkChrome(): string {
-    return window['chrome'] ? 'is-chrome' : '';
+    return window["chrome"] ? "is-chrome" : "";
   }
 
   toggleCalendarVisibility(value?: boolean): void {
     this.showCalendars = value !== null ? value : !this.showCalendars;
   }
 
-  setFromToMonthYear(fromDate?: momentNs.Moment, toDate?: momentNs.Moment): void {
-    const tempFromDate = fromDate || this.fromDate || this.options.startingFromDate || moment();
-    const tempToDate = toDate || this.toDate || this.options.startingToDate || moment();
+  setFromToMonthYear(
+    fromDate?: momentNs.Moment,
+    toDate?: momentNs.Moment
+  ): void {
+    const tempFromDate =
+      fromDate || this.fromDate || this.options.startingFromDate || moment();
+    const tempToDate =
+      toDate || this.toDate || this.options.startingToDate || moment();
 
-    this.fromMonth = tempFromDate.get('month');
-    this.fromYear = tempFromDate.get('year');
+    this.fromMonth = tempFromDate.get("month");
+    this.fromYear = tempFromDate.get("year");
 
-    this.toMonth = tempToDate.get('month');
-    this.toYear = tempToDate.get('year');
+    this.toMonth = tempToDate.get("month");
+    this.toYear = tempToDate.get("year");
   }
 
   updateCalendar(): void {
@@ -186,21 +237,24 @@ export class DateRangePickerComponent implements OnInit {
     if (isLeft) {
       this.fromDate = value;
 
-      if (this.fromDate.isAfter(this.toDate, 'date')) {
+      if (this.fromDate.isAfter(this.toDate, "date")) {
         this.toDate = this.fromDate.clone();
       }
-    }
-    else {
+    } else {
       this.toDate = value;
 
-      if (this.toDate.isBefore(this.fromDate, 'date')) {
+      if (this.toDate.isBefore(this.fromDate, "date")) {
         this.fromDate = this.toDate.clone();
       }
     }
 
     this.setFromToMonthYear(this.fromDate, this.toDate);
 
-    if (this.isAutoApply() && (this.options.singleCalendar || !isLeft) && this.fromDate) {
+    if (
+      this.isAutoApply() &&
+      (this.options.singleCalendar || !isLeft) &&
+      this.fromDate
+    ) {
       this.toggleCalendarVisibility(false);
       this.setRange();
       this.emitRangeSelected();
@@ -209,7 +263,9 @@ export class DateRangePickerComponent implements OnInit {
 
   emitRangeSelected(data?: IDateRange): void {
     if (!data) {
-      data = this.options.singleCalendar ? { start: this.fromDate } : { start: this.fromDate, end: this.toDate };
+      data = this.options.singleCalendar
+        ? { start: this.fromDate }
+        : { start: this.fromDate, end: this.toDate };
     }
 
     this.rangeSelected.emit(data);
@@ -220,13 +276,14 @@ export class DateRangePickerComponent implements OnInit {
   }
 
   formatRangeAsString(): string {
-    let range = '';
+    let range = "";
 
     if (this.options.singleCalendar && this.fromDate) {
       range = this.fromDate.format(this.options.format);
-    }
-    else if (!this.options.singleCalendar && this.fromDate && this.toDate) {
-      range = `${ this.fromDate.format(this.options.format) } - ${ this.toDate.format(this.options.format) }`;
+    } else if (!this.options.singleCalendar && this.fromDate && this.toDate) {
+      range = `${this.fromDate.format(
+        this.options.format
+      )} - ${this.toDate.format(this.options.format)}`;
     }
 
     return range;
@@ -252,7 +309,10 @@ export class DateRangePickerComponent implements OnInit {
       if (target.value) {
         const day = this.getMoment(target.value);
 
-        if (!day.isBefore(this.options.minDate) && !day.isAfter(this.options.maxDate)) {
+        if (
+          !day.isBefore(this.options.minDate) &&
+          !day.isAfter(this.options.maxDate)
+        ) {
           if (isLeft && !this.fromDate) {
             this.fromDate = day;
           }
@@ -263,23 +323,21 @@ export class DateRangePickerComponent implements OnInit {
 
           this.dateChanged({
             day,
-            isLeft,
+            isLeft
           });
 
           this.setFromToMonthYear(this.fromDate, this.toDate);
-        }
-        else {
+        } else {
           // assume nothing - reset values
           this.fromDate = null;
           this.toDate = null;
-          target.value = '';
+          target.value = "";
           target.focus();
         }
       }
 
       this.emitRangeSelected();
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e);
     }
   }
@@ -288,14 +346,13 @@ export class DateRangePickerComponent implements OnInit {
     let temp;
 
     if (data.isLeft) {
-      temp = moment([this.fromYear, this.fromMonth]).add(data.value, 'months');
-      this.fromMonth = temp.get('month');
-      this.fromYear = temp.get('year');
-    }
-    else {
-      temp = moment([this.toYear, this.toMonth]).add(data.value, 'months');
-      this.toMonth = temp.get('month');
-      this.toYear = temp.get('year');
+      temp = moment([this.fromYear, this.fromMonth]).add(data.value, "months");
+      this.fromMonth = temp.get("month");
+      this.fromYear = temp.get("year");
+    } else {
+      temp = moment([this.toYear, this.toMonth]).add(data.value, "months");
+      this.toMonth = temp.get("month");
+      this.toYear = temp.get("year");
     }
   }
 
@@ -303,14 +360,13 @@ export class DateRangePickerComponent implements OnInit {
     let temp;
 
     if (data.isLeft) {
-      temp = moment([this.fromYear, this.fromMonth]).add(data.value, 'year');
-      this.fromMonth = temp.get('month');
-      this.fromYear = temp.get('year');
-    }
-    else {
-      temp = moment([this.toYear, this.toMonth]).add(data.value, 'year');
-      this.toMonth = temp.get('month');
-      this.toYear = temp.get('year');
+      temp = moment([this.fromYear, this.fromMonth]).add(data.value, "year");
+      this.fromMonth = temp.get("month");
+      this.fromYear = temp.get("year");
+    } else {
+      temp = moment([this.toYear, this.toMonth]).add(data.value, "year");
+      this.toMonth = temp.get("month");
+      this.toYear = temp.get("year");
     }
   }
 
@@ -336,9 +392,15 @@ export class DateRangePickerComponent implements OnInit {
     event.stopPropagation();
   }
 
-  applyPredefinedRange(event: Event, definedDateRange: IDefinedDateRange): void {
+  applyPredefinedRange(
+    event: Event,
+    definedDateRange: IDefinedDateRange
+  ): void {
     // adjust to/from month/year so calendar months and years match range
-    this.setFromToMonthYear(definedDateRange.value.start, definedDateRange.value.end);
+    this.setFromToMonthYear(
+      definedDateRange.value.start,
+      definedDateRange.value.end
+    );
 
     this.fromDate = definedDateRange.value.start;
     this.toDate = definedDateRange.value.end;
@@ -348,18 +410,32 @@ export class DateRangePickerComponent implements OnInit {
     }
   }
 
-  validateAndAssignPredefinedRanges(ranges: IDefinedDateRange[]): IDefinedDateRange[] {
+  validateAndAssignPredefinedRanges(
+    ranges: IDefinedDateRange[]
+  ): IDefinedDateRange[] {
     return ranges.filter(range => {
-      if (range.value.start.isAfter(range.value.end, 'date')) {
-        throw new RangeError(`Pre-defined range "${ range.name }" start date cannot be after the end date for the range.`);
+      if (range.value.start.isAfter(range.value.end, "date")) {
+        throw new RangeError(
+          `Pre-defined range "${range.name}" start date cannot be after the end date for the range.`
+        );
       }
 
-      if (this.options.minDate && range.value.start.isBefore(this.options.minDate)) {
-        throw new RangeError(`Pre-defined range "${ range.name }" start date is before the specified minDate in your options.`);
+      if (
+        this.options.minDate &&
+        range.value.start.isBefore(this.options.minDate)
+      ) {
+        throw new RangeError(
+          `Pre-defined range "${range.name}" start date is before the specified minDate in your options.`
+        );
       }
 
-      if (this.options.maxDate && range.value.end.isAfter(this.options.maxDate)) {
-        throw new RangeError(`Pre-defined range "${ range.name }" end date is after the specified maxDate in your options.`);
+      if (
+        this.options.maxDate &&
+        range.value.end.isAfter(this.options.maxDate)
+      ) {
+        throw new RangeError(
+          `Pre-defined range "${range.name}" end date is after the specified maxDate in your options.`
+        );
       }
 
       // add range to ranges
@@ -370,8 +446,7 @@ export class DateRangePickerComponent implements OnInit {
   isAutoApply(): boolean {
     if (this.options.singleCalendar) {
       return true;
-    }
-    else {
+    } else {
       return this.options.autoApply;
     }
   }
