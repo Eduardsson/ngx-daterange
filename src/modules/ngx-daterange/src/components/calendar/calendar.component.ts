@@ -63,7 +63,7 @@ export class CalendarComponent implements OnChanges {
   @Output()
   yearChanged = new EventEmitter<IChangedData>();
 
-  weekList: IDateRange[];
+  weekList: any //IDateRange[];
 
   get monthText() {
     return moment.monthsShort()[this.month];
