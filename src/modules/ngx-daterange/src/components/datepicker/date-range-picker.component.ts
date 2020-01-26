@@ -77,10 +77,14 @@ export class DateRangePickerComponent implements OnInit {
       let targetPathClassNames: string[] = [""];
       if (event["path"]) {
         targetPathClassNames = event["path"].map(obj => obj.className || "");
-      } else if (event.composedPath()) {
-        targetPathClassNames = event
-          .composedPath()
-          .map(item => (<Element>item).className || "");
+      } else {
+        try {
+          targetPathClassNames = event
+            .composedPath()
+            .map(item => (<Element>item).className || "");
+        } catch (error) {
+          console.warn("Edge sux");
+        }
       }
 
       const targetExistsInPath = targetPathClassNames.some(className => {
