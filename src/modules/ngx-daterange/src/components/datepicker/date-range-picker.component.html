@@ -47,11 +47,12 @@
               <div class="col">
                 <calendar [ngClass]="{ 'calendar': true, 'calendar-single': options.singleCalendar }" [isLeft]="true" [month]="fromMonth" [year]="fromYear" (monthChanged)=monthChanged($event)
                   (yearChanged)="yearChanged($event)" (dateChanged)="dateChanged($event)" [format]="options.format" [selectedFromDate]="fromDate"
-                  [selectedToDate]="toDate" [minDate]="options.minDate" [maxDate]="options.maxDate" [singleCalendar]="options.singleCalendar" [icons]="options.icons"></calendar>
+                  [selectedToDate]="toDate" [minDate]="options.minDate" [maxDate]="options.maxDate" [singleCalendar]="options.singleCalendar" [icons]="options.icons" [locale]="locale"></calendar>
               </div>
 
               <div class="col" *ngIf="!options.singleCalendar">
-                <calendar class="calendar" [month]="toMonth" [year]="toYear" [format]="options.format" (dateChanged)="dateChanged($event)" (monthChanged)="monthChanged($event)" (yearChanged)=yearChanged($event) [selectedFromDate]="fromDate" [selectedToDate]="toDate" [minDate]="options.minDate" [maxDate]="options.maxDate" [icons]="options.icons"></calendar>
+                <calendar class="calendar" [month]="toMonth" [year]="toYear" [format]="options.format" (dateChanged)="dateChanged($event)" (monthChanged)="monthChanged($event)"
+                (yearChanged)=yearChanged($event) [selectedFromDate]="fromDate" [selectedToDate]="toDate" [minDate]="options.minDate" [maxDate]="options.maxDate" [icons]="options.icons" [locale]="locale"></calendar>
               </div>
             </div>
           </div>
@@ -64,9 +65,9 @@
                 <button type="button" *ngFor="let range of options.preDefinedRanges" class="btn btn-link" (click)="applyPredefinedRange($event, range)">{{ range.name }}</button>
               </div>
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="close($event)">Close</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm ml-3" (click)="reset($event)" *ngIf="this.range">Reset</button>
-            <button type="button" class="btn btn-primary btn-sm ml-3" [disabled]="!enableApplyButton" (click)="apply($event)" *ngIf="!isAutoApply()">Apply</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="close($event)">{{ getButtonName('Close') }}</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm ml-3" (click)="reset($event)" *ngIf="this.range">{{ getButtonName('Reset') }}</button>
+            <button type="button" class="btn btn-primary btn-sm ml-3" [disabled]="!enableApplyButton" (click)="apply($event)" *ngIf="!isAutoApply()">{{ getButtonName('Apply') }}</button>
           </div>
         </div>
 

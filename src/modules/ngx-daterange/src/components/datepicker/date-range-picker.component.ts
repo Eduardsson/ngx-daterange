@@ -47,6 +47,12 @@ export class DateRangePickerComponent implements OnInit {
   @Input()
   toDate: momentNs.Moment = null;
 
+  @Input()
+  buttonNames?: { name: string; localized: string }[];
+
+  @Input()
+  locale?: string = 'en';
+
   @Output()
   rangeSelected = new EventEmitter<IDateRange>();
 
@@ -57,6 +63,12 @@ export class DateRangePickerComponent implements OnInit {
   toYear: number;
   range = "";
   showCalendars = false;
+
+  buttons: { name: string; localized: string }[] = [
+    { name: "Close", localized: "Close" },
+    { name: "Reset", localized: "Reset" },
+    { name: "Apply", localized: "Apply" },
+  ];
 
   get enableApplyButton(): boolean {
     return (
@@ -159,6 +171,9 @@ export class DateRangePickerComponent implements OnInit {
 
     // set value of control
     this.setRange();
+
+    // set button names
+    this.setButtonNames();
   }
 
   validateInputDates(): void {
@@ -453,5 +468,20 @@ export class DateRangePickerComponent implements OnInit {
     } else {
       return this.options.autoApply;
     }
+  }
+
+  setButtonNames(): void {
+    if (this.buttonNames) {
+      this.buttons.map((i) => {
+          const lName = this.buttonNames.find(btn => btn.name.toLowerCase() === i.name.toLowerCase());
+          if (lName) {
+            i.localized = lName.localized;
+          }
+      });
+    }
+  }
+
+  getButtonName(name: string): string {
+    return this.buttons.find((i) => i.name.toLowerCase() === name.toLowerCase()).localized;
   }
 }

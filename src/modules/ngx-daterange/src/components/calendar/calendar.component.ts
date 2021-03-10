@@ -5,7 +5,8 @@ import {
   EventEmitter,
   OnChanges,
   ViewEncapsulation,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  SimpleChanges
 } from "@angular/core";
 
 import * as momentNs from "moment";
@@ -54,6 +55,9 @@ export class CalendarComponent implements OnChanges {
   @Input()
   icons: string;
 
+  @Input()
+  locale: string;
+
   @Output()
   dateChanged = new EventEmitter<IChangedData>();
 
@@ -69,8 +73,11 @@ export class CalendarComponent implements OnChanges {
     return moment.monthsShort()[this.month];
   }
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     this.createCalendarGridData();
+    if (changes['locale'] && changes['locale'].currentValue !== changes['locale'].previousValue) {
+        moment.locale(this.locale);
+    }
   }
 
   getWeekDays() {
